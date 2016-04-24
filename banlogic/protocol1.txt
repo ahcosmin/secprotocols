@@ -1,0 +1,3 @@
+S->A:{Ts,A<->(Kab)B,{Ts,A<->(Kab)B}Kbs}Kas
+A->B:{Ts,A<->(Kab)B}Kbs,{Ta,A<->(Kab)}Kab from A
+B->A:{Ta,A<->(Kab)B}Kab from B
