@@ -33,7 +33,7 @@ public class FormulaExtractor {
 			String currentLine;
 			while ((currentLine = br.readLine()) != null) {
 				String[] splitAssumptions = currentLine.split(",");
-				assumptions.add(createRule(splitAssumptions[0].trim(), splitAssumptions[1].trim(),
+				assumptions.add(createRule(splitAssumptions[0].trim(),"", splitAssumptions[1].trim(),
 						splitAssumptions[2].trim(), ""));
 			}
 		}
@@ -61,14 +61,19 @@ public class FormulaExtractor {
 		String secondPrincipal = extractSecondPrincipal(currentLine);
 		String message = extractMessage(currentLine);
 		String messageKey = extractMessageKey(currentLine);
-
-		Rule[] rules = { createRule(firstPrincipal, Tokens.said, message, messageKey),
-				createRule(secondPrincipal, Tokens.sees, message, messageKey) };
+		//String from=extractFrom(currentLine);
+		Rule[] rules = { //createRule(firstPrincipal, Tokens.said, message, messageKey),
+				createRule(secondPrincipal,firstPrincipal, Tokens.sees, message, messageKey) };
 
 		return Arrays.asList(rules);
 	}
 
-	public static String extractMessage(String currentLine) {
+	/*public static String extractFrom(String message){
+		int keyTokenIndex = message.indexOf(" from");
+		return message.substring(keyTokenIndex + 1);
+	}*/
+	
+ 	public static String extractMessage(String currentLine) {
 		int messageToIndex = currentLine.indexOf(":");
 		String message = currentLine.substring(messageToIndex + 1);
 		int a = message.indexOf('{');
@@ -78,6 +83,9 @@ public class FormulaExtractor {
 
 	public static String extractMessageKey(String message) {
 		int keyTokenIndex = message.lastIndexOf("}");
+		int b= message.indexOf(" from");
+		if(b!=-1)
+			return message.substring(keyTokenIndex + 1,b);
 		return message.substring(keyTokenIndex + 1);
 	}
 
@@ -95,8 +103,8 @@ public class FormulaExtractor {
 		return principals.split("->");
 	}
 
-	public static Rule createRule(String principal, String operator, String message, String key) {
-		Rule rule = new Rule(principal, operator, message, key);
+	public static Rule createRule(String principal,String fromPrincipal,String operator, String message, String key) {
+		Rule rule = new Rule(principal,	fromPrincipal, operator, message, key);
 		return rule;
 	}
 }
