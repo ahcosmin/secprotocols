@@ -1,0 +1,51 @@
+R1	P belives Q-K-P, P sees {X}K => P belives Q said X  |
+R2	P belives K-Q, P sees {X}K1 => P belives Q said X
+R3	P belives Q=Y=P, P sees <X>Y => P belives Q said X
+R4	P belives fresh(X), P belives Q said X => P belives Q belives X |
+R5	P belives Q controls X, P belives Q belives X => P belives X |
+R6	P sees (X,Y) => P sees X
+R7	P sees <X>Y => P sees X
+R8	P belives Q-K-P, P sees {X}K => P sees X
+R9	P belives K-P, P sees {X}K => P sees X
+R10	P belives K-P, P sees {X}K1 => P sees X
+R11 P belives fresh(X) => P belives fresh(X,Y)
+R12 P belives fresh(X) => P belives fresh (X,Y) |
+R13 X,Y=> X - regula conjuntiei |
+
+
+Protocol Kerberos:
+F1 S->A:{Ts,A<->(Kab)B,{Ts,A<->(Kab)B}Kbs}Kas
+F2 A->B:{Ts,A<->(Kab)B}Kbs,{Ta,A<->(Kab)B}Kab from A
+F3 B->A:{Ta,A<->(Kab)B}Kab from B
+
+Assumptions:
+A1 A, believes, A<->(Kas)S
+A2 S, believes, A<->(Kas)S
+A3 S, believes, A<->(Kab)B
+A4 A, believes, (S controls A<->(K)B)
+A5 A, believes, fresh(Ts)
+A6 B, believes, B<->(Kbs)S
+A7 S, believes, B<->(Kbs)S
+A8 B, believes, (S controls A<->(K)B)
+A9 B, believes, fresh(Ts)
+A10 B, believes, fresh(Ta)
+
+
+Demonstration:
+F1 => A sees {Ts,A<->(Kab)B,{Ts,A<->(Kab)B}Kbs}Kas && A1 =>(R1) A belives S said Ts,A<->(Kab)B,{Ts,A<->(Kab)B}Kbs =>(R13)
+A belives S said Ts, A<->(Kab)B (1) && A belives S said {Ts,A<->(Kab)B}Kbs
+
+A5 =>(R12) A belives fresh(Ts, A<->(Kab)B) && (1)=>(R4) A belives S belives Ts, A<->(Kab)B=>(R13) A belives S belives Ts && A belives S believes A<->(Kab)B (2)
+
+(2)&& A4 =>(R5) A belives A<->(Kab)B (10)
+
+F2=> B sees {Ts,A<->(Kab)B}Kbs,{Ta,A<->(Kab)B}Kab =>(R13) B sees {Ts,A<->(Kab)B}Kbs(3) && B sees {Ta,A<->(Kab)}Kab (4)
+
+(3) && A6 => B belives S said Ts,A<->(Kab)B (5)
+
+A9=>(R12) B belives fresh(Ts, A<->(Kab)B) && (5)=>(R5) B belives S belives Ts, A<->(Kab)B=>(R13) B belives S belives Ts && B belives S believes A<->(Kab)B (6)
+
+(6) && A8 =>(R5) B belives A<->(Kab)B && (7)  =>(R1) B belives A said Ta,A<->(Kab)(8)
+A10=>(R12) B belives fresh(Ta, A<->(Kab))&&(8)=>(R4) B belives A belives Ta,A<->(Kab)=>(R13) B belives A belives Ta && B belives A belives A<->(Kab) B
+
+F3 => A sees {Ta,A<->(Kab)B}Kab &&(10)=> A belives B said Ta,A<->(Kab)B
