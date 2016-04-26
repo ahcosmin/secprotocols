@@ -14,6 +14,7 @@ public class FormulaApplier {
 	public Formula applyR1Rule(Formula pr){
 		Formula result=null;
 		if(pr.getOperator()==Tokens.sees){
+			System.out.println("	Try to apply formula R1	P belives Q<->(K)P, P sees {X}K => P belives Q said X");
 			String message=pr.getPrincipal()+"<->("+pr.getKey()+")"+pr.getFromPrincipal();
 			Formula r= new Formula(pr.getPrincipal(),"",Tokens.believes,message,"");
 			if(belives.contains(r)){
@@ -21,7 +22,7 @@ public class FormulaApplier {
 				result=new Formula(pr.getPrincipal(),"", Tokens.believes,resultMessage,"");
 				result.setCanApplyRule(true);
 				belives.add(result);
-				System.out.println(r.toString()+" "+ pr.toString()+ "=>"+ result.toString());
+				System.out.println("	"+r.toString()+" "+ pr.toString()+ "=>"+ result.toString());
 			}
 		}
 		return result;

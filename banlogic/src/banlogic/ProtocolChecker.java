@@ -8,6 +8,9 @@ public class ProtocolChecker {
 	private List<Formula> protocol;
 	private List<Formula> belives;
 	private FormulaApplier fa;
+	private Formula result1=new Formula("A","",Tokens.believes,"A<->(Kab)B","");
+	private Formula result2=new Formula("B","",Tokens.believes,"A<->(Kab)B","");
+
 	public ProtocolChecker(List<Formula> protocol, List<Formula> assumptions){
 		this.protocol=protocol;
 		this.belives=new ArrayList<Formula>(assumptions);
@@ -23,7 +26,10 @@ public class ProtocolChecker {
 				rule.setCanApplyRule(false);
 			}
 		}
-		
+		if(belives.contains(result1)&&belives.contains(result2))
+			System.out.println("Authentication proven!");
+		else
+			System.out.println("Could not prove authentication!");
 	}
 	private Boolean rulesCanByApplied(){
 		for (Formula rule : belives) {
@@ -41,9 +47,16 @@ public class ProtocolChecker {
 	}
 	
 	private void applyRules(Formula formula){
-		Formula r1=fa.applyR1Rule(formula);
-		r1.setCanApplyRule(true);
-		belives.add(r1);
+		System.out.println("Belives: "+belives);
+		System.out.println("Apply formulas for "+formula);
+		addResult(fa.applyR1Rule(formula));
+		System.out.println("_________________________________________");
+	}
+	private void addResult(Formula formula){
+		if(formula!=null){
+			formula.setCanApplyRule(true);
+			belives.add(formula);
+		}
 	}
 
 }
