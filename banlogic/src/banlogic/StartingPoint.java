@@ -7,9 +7,9 @@ import java.util.List;
 
 public class StartingPoint {
 	public static void main(String[] args) throws FileNotFoundException, IOException{
-		List<Rule> list=FormulaExtractor.extractProtocolFormulas();
-		List<Rule> as= FormulaExtractor.extractAssumptions();
-		FormulaApplier fa=new FormulaApplier(list,as);
-		fa.applyRules();
+		List<Formula> list=FormulaExtractor.extractProtocolFormulas();
+		List<Formula> as= FormulaExtractor.extractAssumptions();
+		ProtocolChecker pc=new ProtocolChecker(list,as);
+		pc.checkProtocol();
 	}
 }

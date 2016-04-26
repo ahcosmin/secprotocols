@@ -5,30 +5,25 @@ import java.util.List;
 
 public class FormulaApplier {
 
-	private List<Rule> protocol;
-	private List<Rule> belives;
+	private List<Formula> belives;
 	
-	FormulaApplier(List<Rule> protocol, List<Rule> assumptions){
-		this.protocol=protocol;
-		this.belives=new ArrayList<Rule>(assumptions);
+	FormulaApplier( List<Formula> assumptions){
+		this.belives=new ArrayList<Formula>(assumptions);
 	}
 	//R1	P belives Q<->(K)P, P sees {X}K => P belives Q said X
-	private Boolean applyR1Rule(Rule pr){
-		Boolean validRule=false;
+	public Formula applyR1Rule(Formula pr){
+		Formula result=null;
 		if(pr.getOperator()==Tokens.sees){
 			String message=pr.getPrincipal()+"<->("+pr.getKey()+")"+pr.getFromPrincipal();
-			Rule r= new Rule(pr.getPrincipal(),"",Tokens.believes,message,"");
+			Formula r= new Formula(pr.getPrincipal(),"",Tokens.believes,message,"");
 			if(belives.contains(r)){
-				validRule=true;
-				String resultMessage=pr.getFromPrincipal()+" "+Tokens.said+" "+pr.getMessage()+" "+pr.getKey();
-				Rule result=new Rule(pr.getPrincipal(),"", Tokens.believes,resultMessage,"");
+				String resultMessage=pr.getFromPrincipal()+" "+Tokens.said+" "+pr.getMessage();
+				result=new Formula(pr.getPrincipal(),"", Tokens.believes,resultMessage,"");
+				result.setCanApplyRule(true);
 				belives.add(result);
 				System.out.println(r.toString()+" "+ pr.toString()+ "=>"+ result.toString());
 			}
 		}
-		return validRule;
-	}
-	public void applyRules(){
-		applyR1Rule(protocol.get(0));
+		return result;
 	}
 }

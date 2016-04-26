@@ -13,13 +13,13 @@ public class FormulaExtractor {
 	private final static String assumptionsFilename = "assumptions1.txt";
 	private static int currentMessage = 1;
 
-	public static List<Rule> extractProtocolFormulas() throws FileNotFoundException, IOException {
-		List<Rule> protocolFormulas = new ArrayList<Rule>();
+	public static List<Formula> extractProtocolFormulas() throws FileNotFoundException, IOException {
+		List<Formula> protocolFormulas = new ArrayList<Formula>();
 
 		try (BufferedReader br = new BufferedReader(new FileReader(protocolFilename))) {
 			String currentLine;
 			while ((currentLine = br.readLine()) != null) {
-				List<Rule> currentLineRules = extractRules(currentLine);
+				List<Formula> currentLineRules = extractFormulas(currentLine);
 				protocolFormulas.addAll(currentLineRules);
 			}
 		}
@@ -27,21 +27,21 @@ public class FormulaExtractor {
 		return protocolFormulas;
 	}
 
-	public static List<Rule> extractAssumptions() throws FileNotFoundException, IOException {
-		List<Rule> assumptions = new ArrayList<Rule>();
+	public static List<Formula> extractAssumptions() throws FileNotFoundException, IOException {
+		List<Formula> assumptions = new ArrayList<Formula>();
 		try (BufferedReader br = new BufferedReader(new FileReader(assumptionsFilename))) {
 			String currentLine;
 			while ((currentLine = br.readLine()) != null) {
 				String[] splitAssumptions = currentLine.split(",");
-				assumptions.add(createRule(splitAssumptions[0].trim(),"", splitAssumptions[1].trim(),
+				assumptions.add(createFormula(splitAssumptions[0].trim(),"", splitAssumptions[1].trim(),
 						splitAssumptions[2].trim(), ""));
 			}
 		}
 		return assumptions;
 	}
 	
-	public static List<Rule> getFormulasForNextMessage() throws FileNotFoundException, IOException{
-		List<Rule> protocolFormulas = new ArrayList<Rule>();
+	public static List<Formula> getFormulasForNextMessage() throws FileNotFoundException, IOException{
+		List<Formula> protocolFormulas = new ArrayList<Formula>();
 
 		try (BufferedReader br = new BufferedReader(new FileReader(protocolFilename))) {
 			String currentLine = "";
@@ -49,21 +49,21 @@ public class FormulaExtractor {
 				currentLine = br.readLine();
 			}
 			
-			List<Rule> currentLineRules = extractRules(currentLine);
-			protocolFormulas.addAll(currentLineRules);
+			List<Formula> currentLineFormulas = extractFormulas(currentLine);
+			protocolFormulas.addAll(currentLineFormulas);
 			currentMessage++;
 		}
 		return protocolFormulas;
 	}
 
-	public static List<Rule> extractRules(String currentLine) {
+	public static List<Formula> extractFormulas(String currentLine) {
 		String firstPrincipal = extractFirstPrincipal(currentLine);
 		String secondPrincipal = extractSecondPrincipal(currentLine);
 		String message = extractMessage(currentLine);
 		String messageKey = extractMessageKey(currentLine);
 		//String from=extractFrom(currentLine);
-		Rule[] rules = { //createRule(firstPrincipal, Tokens.said, message, messageKey),
-				createRule(secondPrincipal,firstPrincipal, Tokens.sees, message, messageKey) };
+		Formula[] rules = { //createRule(firstPrincipal, Tokens.said, message, messageKey),
+				createFormula(secondPrincipal,firstPrincipal, Tokens.sees, message, messageKey) };
 
 		return Arrays.asList(rules);
 	}
@@ -103,8 +103,8 @@ public class FormulaExtractor {
 		return principals.split("->");
 	}
 
-	public static Rule createRule(String principal,String fromPrincipal,String operator, String message, String key) {
-		Rule rule = new Rule(principal,	fromPrincipal, operator, message, key);
-		return rule;
+	public static Formula createFormula(String principal,String fromPrincipal,String operator, String message, String key) {
+		Formula formula = new Formula(principal,	fromPrincipal, operator, message, key);
+		return formula;
 	}
 }
