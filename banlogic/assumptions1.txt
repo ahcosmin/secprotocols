@@ -1,10 +1,10 @@
 A, believes, A<->(Kas)S
 S, believes, A<->(Kas)S
 S, believes, A<->(Kab)B
-A, believes, (S controls A<->(K)B)
+A, believes, S controls A<->(K)B
 A, believes, fresh(Ts)
 B, believes, B<->(Kbs)S
 S, believes, B<->(Kbs)S
-B, believes, (S controls A<->(K)B)
+B, believes, S controls A<->(K)B
 B, believes, fresh(Ts)
 B, believes, fresh(Ta)
