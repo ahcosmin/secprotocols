@@ -93,8 +93,25 @@ public class FormulaApplier {
 	}
 
 	// P believes fresh(X), P believes Q said X => P believes Q belives X
-	public void applyR4Rule(Formula oldFormula) {
-		List<Formula> believesFormulas = FormulaUtils.getBelievesFormulas(believes);
+	public Formula applyR4Rule(Formula oldFormula) {
+		System.out.println("	Try to apply formula R4 P believes fresh(X), P believes Q said X => P believes Q belives X");
+		if(!oldFormula.getOperator().equals(Tokens.believes)|| !oldFormula.getMessage().contains(Tokens.said))
+			return null;
+		String oldFormulaMessage=oldFormula.getMessage();
+		String message=oldFormulaMessage.substring(oldFormulaMessage.indexOf(Tokens.said)+Tokens.said.length()+1);
+		String[] messages=message.split(",");
+		for (String string : messages) {
+			Formula formulaAux=new Formula(oldFormula.getPrincipal(),"",Tokens.believes,"fresh("+string+")","");
+			if(believes.contains(formulaAux))
+			{
+				Formula result=new Formula(oldFormula.getPrincipal(),"",Tokens.believes, message,"");
+				System.out.println("	" + oldFormula.toString() + " "+formulaAux.toString() +"=>" + result.toString());
+				believes.add(result);
+				return result;
+			}
+		}
+		
+		/*List<Formula> believesFormulas = FormulaUtils.getBelievesFormulas(believes);
 		List<Formula> freshMessageFormulas = FormulaUtils.getFormulasWithFreshMessage(believesFormulas);
 		List<Formula> saidMessageFormulas = FormulaUtils.getFormulasWithSaidMessage(believesFormulas);
 
@@ -107,13 +124,14 @@ public class FormulaApplier {
 					if (freshParameter.equals(saidParameters[2])) {
 						Formula newFormula = new Formula(f2.getPrincipal(), "", f1.getOperator(),
 								saidParameters[0] + " " + Tokens.believes + " " + freshParameter, "");
-						System.out.println(newFormula);
+						System.out.println("	" + oldFormula.toString() + " " +"=>" + newFormula.toString());
 						believes.add(newFormula);
+						return newFormula;
 					}
 				}
 			}
-		}
-
+		}*/
+		return null;
 	}
 
 	// R5 P belives Q controls X, P belives Q belives X => P belives X

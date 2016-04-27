@@ -55,6 +55,8 @@ public class ProtocolChecker {
 		System.out.println("Apply formulas for " + formula);
 		addResult(fa.applyR1Rule(formula));
 		System.out.println("___________________________________________________________________");
+		addResult(fa.applyR4Rule(formula));
+		System.out.println("___________________________________________________________________");
 		addResult(fa.applyR5Rule(formula));
 		System.out.println("___________________________________________________________________");
 		List<Formula> results = fa.applyR13Rule(formula);
