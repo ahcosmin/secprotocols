@@ -1,6 +1,5 @@
 package banlogic;
 
-import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
