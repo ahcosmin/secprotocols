@@ -72,6 +72,15 @@ public class FormulaApplier {
 			list.add(result2);
 			break;
 		}
+		if (message.contains(",")) {
+			String[] splitMessage = message.split(",");
+			for (String newMessage : splitMessage) {
+				Formula result=FormulaUtils.cloneRuleWithNewMessage(oldFormula, newMessage, auxMessage);
+				System.out.println("	"+oldFormula.toString()+ "=>"+ result.toString());
+				believes.add(result);
+				list.add(result);
+			}
+		}
 		return list;
 	}
 
