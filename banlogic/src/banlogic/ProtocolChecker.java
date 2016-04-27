@@ -27,7 +27,7 @@ public class ProtocolChecker {
 			}
 		}
 		if(belives.contains(result1)&&belives.contains(result2))
-			System.out.println("Authentication proven!");
+			System.out.println("Authentication proved!");
 		else
 			System.out.println("Could not prove authentication!");
 	}
@@ -47,16 +47,26 @@ public class ProtocolChecker {
 	}
 	
 	private void applyRules(Formula formula){
-		System.out.println("Belives: "+belives);
-		System.out.println("Apply formulas for "+formula);
-		addResult(fa.applyR1Rule(formula));
+		System.out.println("Belives: " + belives);
+		System.out.println("Apply formulas for " + formula);
+		addResult(fa.applyR1Rule(formula));	
 		System.out.println("_________________________________________");
+		addResult(fa.applyR5Rule(formula));
+		System.out.println("_________________________________________");
+		List<Formula> results=fa.applyR13Rule(formula);
+		for (Formula aux : results) {
+			addResult(aux);
+		}
+		System.out.println("_________________________________________");
+		
 	}
 	private void addResult(Formula formula){
 		if(formula!=null){
 			formula.setCanApplyRule(true);
-			belives.add(formula);
+			if(!belives.contains(formula))
+				belives.add(formula);
 		}
+		
 	}
 
 }

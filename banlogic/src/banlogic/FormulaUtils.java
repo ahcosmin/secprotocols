@@ -24,7 +24,9 @@ public class FormulaUtils {
 		return filteredList;
 	}
 	
-	public static Formula cloneRuleWithNewMessage(Formula oldFormula, String newMessage){
+	public static Formula cloneRuleWithNewMessage(Formula oldFormula, String newMessage, String auxMessage){
+		if(!auxMessage.equals(""))
+			newMessage=auxMessage+" "+newMessage;
 		Formula newFormula = new Formula(oldFormula.getPrincipal(), oldFormula.getFromPrincipal(),
 				oldFormula.getOperator(), newMessage, oldFormula.getKey());
 		return newFormula;

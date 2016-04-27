@@ -6,16 +6,15 @@ import java.util.List;
 public class FormulaApplier {
 
 	private List<Formula> believes;
-	private List<Formula> protocol;
 	
 	FormulaApplier( List<Formula> assumptions){
 		this.believes=new ArrayList<Formula>(assumptions);
 	}
 	//R1	P belives Q<->(K)P, P sees {X}K => P belives Q said X
 	public Formula applyR1Rule(Formula pr){
+		System.out.println("	Try to apply formula R1	P belives Q<->(K)P, P sees {X}K => P belives Q said X");
 		Formula result=null;
 		if(pr.getOperator()==Tokens.sees){
-			System.out.println("	Try to apply formula R1	P belives Q<->(K)P, P sees {X}K => P belives Q said X");
 			String message=pr.getPrincipal()+"<->("+pr.getKey()+")"+pr.getFromPrincipal();
 			Formula r= new Formula(pr.getPrincipal(),"",Tokens.believes,message,"");
 			if(believes.contains(r)){
@@ -30,11 +29,30 @@ public class FormulaApplier {
 	}
 	
 	// R13 X,Y=> X - conjunction rule
-		public void applyR13Rule(Formula oldFormula) {
-			String message = oldFormula.getMessage();
-
+		public List<Formula> applyR13Rule(Formula oldFormula) {
+			System.out.println("	Try to apply formula R13 X,Y=> X; X,Y=>Y - conjunction rule");
+			if(!oldFormula.getKey().equals("")){
+				return new ArrayList<Formula>();
+			}
+			List<Formula> list= new ArrayList<Formula>();
+			
+			String oldformulaMessage = oldFormula.getMessage();
+			String message=oldformulaMessage;
+			String auxMessage="";
+			for (String	predicate : Tokens.predicates) {
+				if(oldformulaMessage.contains(predicate))
+				{
+					int index=oldformulaMessage.indexOf(predicate);
+					auxMessage=oldformulaMessage.substring(0, index+predicate.length());
+					message=oldformulaMessage.substring(index+predicate.length()+1);
+					break;
+				}
+			}
+			
 			while (message.contains("{")) {
 				int startIndexOfEncryptedSubmessage = message.indexOf('{');
+				if(!message.substring(0,startIndexOfEncryptedSubmessage).contains(","))
+					return new ArrayList<Formula>();
 				int endIndexOfEncryptedSubmessage = message.indexOf('}');
 				int firstCommaAfterEncryptedSubmessage = message.indexOf(",", endIndexOfEncryptedSubmessage);
 				String submessage = "";
@@ -42,17 +60,28 @@ public class FormulaApplier {
 					submessage = message.substring(startIndexOfEncryptedSubmessage, firstCommaAfterEncryptedSubmessage);
 				else
 					submessage = message.substring(startIndexOfEncryptedSubmessage);
-				believes.add(FormulaUtils.cloneRuleWithNewMessage(oldFormula, submessage));
+				Formula result=FormulaUtils.cloneRuleWithNewMessage(oldFormula, submessage, auxMessage);
+				System.out.println("	"+oldFormula.toString()+ "=>"+ result.toString());
+				believes.add(result);
+				list.add(result);
 				message = message.replace(submessage, "");
+				Formula result2=FormulaUtils.cloneRuleWithNewMessage(oldFormula, message.substring(0,message.length()-1), auxMessage);
+				System.out.println("	"+oldFormula.toString()+ "=>"+ result2.toString());
+				believes.add(result2);
+				list.add(result2);
 				break;
 			}
 
 			if (message.contains(",")) {
 				String[] splitMessage = message.split(",");
 				for (String newMessage : splitMessage) {
-					believes.add(FormulaUtils.cloneRuleWithNewMessage(oldFormula, newMessage));
+					Formula result=FormulaUtils.cloneRuleWithNewMessage(oldFormula, newMessage, auxMessage);
+					System.out.println("	"+oldFormula.toString()+ "=>"+ result.toString());
+					believes.add(result);
+					list.add(result);
 				}
 			}
+			return list;
 		}
 
 		// P believes fresh(X) => P believes fresh (X,Y)
@@ -77,6 +106,39 @@ public class FormulaApplier {
 			System.out.println(believes);
 		}
 
+		//R5 P belives Q controls X, P belives Q belives X => P belives X 
+		public Formula applyR5Rule(Formula oldFormula){
+			System.out.println("	Try to apply formula R5 P belives Q controls X, P belives Q belives X => P belives X");
+			if(oldFormula.getOperator()!=Tokens.believes)
+				return null;
+			String formulaMessage=oldFormula.getMessage();
+			if(formulaMessage.matches("(.*) "+Tokens.believes+" (.*)")){
+				String[] messages=oldFormula.getMessage().split(" ");
+				String agent=messages[0];
+				String message=messages[2];
+				String newMessage=agent +" "+Tokens.believes+" "+message;
+				Formula searhFormula=new Formula(oldFormula.getPrincipal(),"",Tokens.controls,newMessage,"");
+				if(believes.contains(searhFormula)){
+					Formula result=new Formula(oldFormula.getPrincipal(),"",Tokens.believes,message,"");
+					System.out.println("	"+oldFormula.toString()+" "+ searhFormula.toString()+ "=>"+ result.toString());
+					return result;
+				}
+			}
+			if(formulaMessage.matches("(.*) "+Tokens.controls+" (.*)")){
+				String[] messages=oldFormula.getMessage().split(" ");
+				String agent=messages[0];
+				String message=messages[2];
+				String newMessage=agent +" "+Tokens.believes+" "+message;
+				Formula searhFormula=new Formula(oldFormula.getPrincipal(),"",Tokens.believes,newMessage,"");
+				if(believes.contains(searhFormula)){
+					Formula result=new Formula(oldFormula.getPrincipal(),"",Tokens.believes,message,"");
+					System.out.println("	"+oldFormula.toString()+" "+ searhFormula.toString()+ "=>"+ result.toString());
+					return result;
+				}
+			}
+			return null;
+		}
+		
 		public Formula mergeFormulas(Formula freshFormula, Formula believeFormula) {
 			String message = composeMessage(freshFormula, believeFormula);
 			Formula newFormula = new Formula(freshFormula.getPrincipal(), freshFormula.getFromPrincipal(),
@@ -96,10 +158,4 @@ public class FormulaApplier {
 			return message.substring(startIndex + 1, endIndex);
 		}
 
-		public void applyRules() {
-			applyR1Rule(protocol.get(0));
-			applyR13Rule(protocol.get(0));
-			applyR12Rule(protocol.get(0));
-			applyR4Rule(protocol.get(0));
-		}
 }
