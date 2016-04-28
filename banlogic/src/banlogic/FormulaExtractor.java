@@ -60,7 +60,7 @@ public class FormulaExtractor {
 		String firstPrincipal = extractFirstPrincipal(currentLine);
 		String secondPrincipal = extractSecondPrincipal(currentLine);
 		String message = extractMessage(currentLine);
-		String messageKey = extractMessageKey(currentLine);
+		String messageKey = extractMessageKey(currentLine,message);
 		//String from=extractFrom(currentLine);
 		Formula[] rules = { //createRule(firstPrincipal, Tokens.said, message, messageKey),
 				createFormula(secondPrincipal,firstPrincipal, Tokens.sees, message, messageKey) };
@@ -78,15 +78,23 @@ public class FormulaExtractor {
 		String message = currentLine.substring(messageToIndex + 1);
 		int a = message.indexOf('{');
 		int b = message.lastIndexOf('}');
-		return message.substring(a + 1, b);
+		String newMessage=message.substring(a + 1, b);
+		if(!newMessage.matches("(.*)\\}(.*)\\{(.*)")){
+			return newMessage;
+		}
+		int c= message.indexOf(" from");
+		return message.substring(0,c);
 	}
 
-	public static String extractMessageKey(String message) {
-		int keyTokenIndex = message.lastIndexOf("}");
-		int b= message.indexOf(" from");
+	public static String extractMessageKey(String currentLine, String message) {
+		if(message.matches("\\{(.*)\\}(.*)")){
+			return "";
+		}
+		int keyTokenIndex = currentLine.lastIndexOf("}");
+		int b= currentLine.indexOf(" from");
 		if(b!=-1)
-			return message.substring(keyTokenIndex + 1,b);
-		return message.substring(keyTokenIndex + 1);
+			return currentLine.substring(keyTokenIndex + 1,b);
+		return currentLine.substring(keyTokenIndex + 1);
 	}
 
 	public static String extractFirstPrincipal(String message) {

@@ -49,10 +49,13 @@ public class FormulaApplier {
 			}
 		}
 
-		while (message.contains("{")) {
+		if (message.contains("{")) {
 			int startIndexOfEncryptedSubmessage = message.indexOf('{');
-			if (!message.substring(0, startIndexOfEncryptedSubmessage).contains(","))
-				return new ArrayList<Formula>();
+			/*
+			 * if (!message.substring(0,
+			 * startIndexOfEncryptedSubmessage).contains(",")) return new
+			 * ArrayList<Formula>();
+			 */
 			int endIndexOfEncryptedSubmessage = message.indexOf('}');
 			int firstCommaAfterEncryptedSubmessage = message.indexOf(",", endIndexOfEncryptedSubmessage);
 			String submessage = "";
@@ -61,22 +64,37 @@ public class FormulaApplier {
 			else
 				submessage = message.substring(startIndexOfEncryptedSubmessage);
 			Formula result = FormulaUtils.cloneRuleWithNewMessage(oldFormula, submessage, auxMessage);
-			System.out.println("	" + oldFormula.toString() + "=>" + result.toString());
-			believes.add(result);
-			list.add(result);
-			message = message.replace(submessage, "");
-			Formula result2 = FormulaUtils.cloneRuleWithNewMessage(oldFormula,
-					message.substring(0, message.length() - 1), auxMessage);
-			System.out.println("	" + oldFormula.toString() + "=>" + result2.toString());
-			believes.add(result2);
-			list.add(result2);
-			break;
+
+			if (!believes.contains(result)) {
+				System.out.println("	" + oldFormula.toString() + "=>" + result.toString());
+				believes.add(result);
+				list.add(result);
+			}
+			if(submessage.charAt(0)=='{')
+				message = message.replace(submessage, "");
+			if (message.length() > 0) {
+				String newMessage2;
+				if(message.charAt(0)==','){
+					newMessage2=message.substring(1, message.length());
+				}
+				else{
+					newMessage2=message.substring(0, message.length() - 1);
+				}
+				Formula result2 = FormulaUtils.cloneRuleWithNewMessage(oldFormula,
+						newMessage2, auxMessage);
+				System.out.println("	" + oldFormula.toString() + "=>" + result2.toString());
+				believes.add(result2);
+				list.add(result2);
+				if(newMessage2.charAt(0)=='{')
+					message = message.replace(newMessage2, "");
+			}
+			
 		}
 		if (message.contains(",")) {
 			String[] splitMessage = message.split(",");
 			for (String newMessage : splitMessage) {
-				Formula result=FormulaUtils.cloneRuleWithNewMessage(oldFormula, newMessage, auxMessage);
-				System.out.println("	"+oldFormula.toString()+ "=>"+ result.toString());
+				Formula result = FormulaUtils.cloneRuleWithNewMessage(oldFormula, newMessage, auxMessage);
+				System.out.println("	" + oldFormula.toString() + "=>" + result.toString());
 				believes.add(result);
 				list.add(result);
 			}
@@ -103,43 +121,46 @@ public class FormulaApplier {
 
 	// P believes fresh(X), P believes Q said X => P believes Q belives X
 	public Formula applyR4Rule(Formula oldFormula) {
-		System.out.println("	Try to apply formula R4 P believes fresh(X), P believes Q said X => P believes Q belives X");
-		if(!oldFormula.getOperator().equals(Tokens.believes)|| !oldFormula.getMessage().contains(Tokens.said))
+		System.out.println(
+				"	Try to apply formula R4 P believes fresh(X), P believes Q said X => P believes Q belives X");
+		if (!oldFormula.getOperator().equals(Tokens.believes) || !oldFormula.getMessage().contains(Tokens.said))
 			return null;
-		String oldFormulaMessage=oldFormula.getMessage();
-		String message=oldFormulaMessage.substring(oldFormulaMessage.indexOf(Tokens.said)+Tokens.said.length()+1);
-		String[] messages=message.split(",");
+		String oldFormulaMessage = oldFormula.getMessage();
+		String message = oldFormulaMessage.substring(oldFormulaMessage.indexOf(Tokens.said) + Tokens.said.length() + 1);
+		String[] messages = message.split(",");
 		for (String string : messages) {
-			Formula formulaAux=new Formula(oldFormula.getPrincipal(),"",Tokens.believes,"fresh("+string+")","");
-			if(believes.contains(formulaAux))
-			{
-				Formula result=new Formula(oldFormula.getPrincipal(),"",Tokens.believes, message,"");
-				System.out.println("	" + oldFormula.toString() + " "+formulaAux.toString() +"=>" + result.toString());
+			Formula formulaAux = new Formula(oldFormula.getPrincipal(), "", Tokens.believes, "fresh(" + string + ")",
+					"");
+			if (believes.contains(formulaAux)) {
+				Formula result = new Formula(oldFormula.getPrincipal(), "", Tokens.believes, message, "");
+				System.out
+						.println("	" + oldFormula.toString() + " " + formulaAux.toString() + "=>" + result.toString());
 				believes.add(result);
 				return result;
 			}
 		}
-		
-		/*List<Formula> believesFormulas = FormulaUtils.getBelievesFormulas(believes);
-		List<Formula> freshMessageFormulas = FormulaUtils.getFormulasWithFreshMessage(believesFormulas);
-		List<Formula> saidMessageFormulas = FormulaUtils.getFormulasWithSaidMessage(believesFormulas);
 
-		for (Formula f1 : freshMessageFormulas) {
-			for (Formula f2 : saidMessageFormulas) {
-				if (f1.getPrincipal().equals(f2.getPrincipal())) {
-					String freshParameter = extractParameter(f1.getMessage());
-					String[] saidParameters = f2.getMessage().split(" ");
-
-					if (freshParameter.equals(saidParameters[2])) {
-						Formula newFormula = new Formula(f2.getPrincipal(), "", f1.getOperator(),
-								saidParameters[0] + " " + Tokens.believes + " " + freshParameter, "");
-						System.out.println("	" + oldFormula.toString() + " " +"=>" + newFormula.toString());
-						believes.add(newFormula);
-						return newFormula;
-					}
-				}
-			}
-		}*/
+		/*
+		 * List<Formula> believesFormulas =
+		 * FormulaUtils.getBelievesFormulas(believes); List<Formula>
+		 * freshMessageFormulas =
+		 * FormulaUtils.getFormulasWithFreshMessage(believesFormulas);
+		 * List<Formula> saidMessageFormulas =
+		 * FormulaUtils.getFormulasWithSaidMessage(believesFormulas);
+		 * 
+		 * for (Formula f1 : freshMessageFormulas) { for (Formula f2 :
+		 * saidMessageFormulas) { if
+		 * (f1.getPrincipal().equals(f2.getPrincipal())) { String freshParameter
+		 * = extractParameter(f1.getMessage()); String[] saidParameters =
+		 * f2.getMessage().split(" ");
+		 * 
+		 * if (freshParameter.equals(saidParameters[2])) { Formula newFormula =
+		 * new Formula(f2.getPrincipal(), "", f1.getOperator(),
+		 * saidParameters[0] + " " + Tokens.believes + " " + freshParameter,
+		 * ""); System.out.println("	" + oldFormula.toString() + " " +"=>" +
+		 * newFormula.toString()); believes.add(newFormula); return newFormula;
+		 * } } } }
+		 */
 		return null;
 	}
 
